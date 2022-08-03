@@ -1,3 +1,5 @@
+*.json
+gmail-quick
 # Binaries for programs and plugins
 *.exe
 *.exe~
