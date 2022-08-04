@@ -89,12 +89,14 @@ func message(c *config) *gmail.Message {
 	header["To"] = c.receiver
 	header["Subject"] = c.subject
 	header["Content-Type"] = "text/plain"
-	header["Content-Transfer-Encoding"] = "base64"
+	//	Does not work reliably.
+	//	Sometimes received content is only a few, unpritable, characters.
+	//	header["Content-Transfer-Encoding"] = "base64"
 	var message string
 	for k, v := range header {
-		message += fmt.Sprintf("%s: %s\n", k, v)
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
-	message += "\n" + message_content(c.infile)
+	message += "\r\n" + message_content(c.infile)
 	return &gmail.Message{Raw: base64.URLEncoding.EncodeToString([]byte(message))}
 }
 
