@@ -25,12 +25,12 @@ type config struct {
 	subject  string
 }
 
-const credentials = "credentials.json"
-const token = "token.json"
+const credentials_file = "credentials.json"
+const token_file = "token.json"
 
 func main() {
 	service := service_wrapper(os.Args[0])
-	if len(os.Args) == 1 {
+	if len(os.Args) < 2 {
 		list_labels(service)
 	} else {
 		c := configuration(os.Args, "from")
@@ -90,7 +90,7 @@ func message(c *config) *gmail.Message {
 	header["Subject"] = c.subject
 	header["Content-Type"] = "text/plain"
 	//	Does not work reliably.
-	//	Sometimes received content is only a few, unpritable, characters.
+	//	Sometimes received content is only a few, unprintable, characters.
 	//	header["Content-Transfer-Encoding"] = "base64"
 	var message string
 	for k, v := range header {
@@ -110,8 +110,8 @@ func message_content(infile string) string {
 
 func service_wrapper(program string) *gmail.Service {
 	directory := path.Dir(program)
-	credentials := service_file("credentials", path.Join(directory, credentials))
-	token := service_file("token", path.Join(directory, token))
+	credentials := service_file("credentials", path.Join(directory, credentials_file))
+	token := service_file("token", path.Join(directory, token_file))
 	return service(credentials, token)
 }
 
