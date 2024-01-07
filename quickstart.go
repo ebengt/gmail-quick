@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 
@@ -159,19 +160,31 @@ func getClient(config *oauth2.Config, tokFile string) *http.Client {
 // Request a token from the web, then returns the retrieved token.
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
+	fmt.Printf("Go to the following link in your browser, then type the request here:\n%v\n", authURL)
 
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
+	var request string
+	if _, err := fmt.Scan(&request); err != nil {
 		log.Fatalf("Unable to read authorization code: %v", err)
 	}
-
+	authCode := getTokenFromWebParse(request)
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
 		log.Fatalf("Unable to retrieve token from web: %v", err)
 	}
 	return tok
+}
+
+// Parse request for the retrieved token.
+func getTokenFromWebParse(request string) string {
+	u, err := url.Parse(request)
+	if err != nil {
+		log.Fatalf("Unable to parse request: %v", err)
+	}
+	q, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		log.Fatalf("Unable to parse query: %v", err)
+	}
+	return q["code"][0]
 }
 
 // Retrieves a token from a local file.
