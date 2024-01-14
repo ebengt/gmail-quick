@@ -22,11 +22,3 @@ func Test_config(t *testing.T) {
 		t.Errorf("config = %s; want sender", c.from)
 	}
 }
-
-func Test_parse_request(t *testing.T) {
-	args := "http://localhost:4000/?state=state-token&code=4/0AfJohXmVHC-A5HOGVI4MDvXUyLc4plBIkjLzcPHxfyuXxQPaikecCRsVWTSDZcE4sVXzdg&scope=https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/gmail.compose"
-	code := getTokenFromWebParse(args)
-	if code != "4/0AfJohXmVHC-A5HOGVI4MDvXUyLc4plBIkjLzcPHxfyuXxQPaikecCRsVWTSDZcE4sVXzdg" {
-		t.Errorf("%s; want 4/0AfJohXmVHC-A5HOGVI4MDvXUyLc4plBIkjLzcPHxfyuXxQPaikecCRsVWTSDZcE4sVXzdg", code)
-	}
-}

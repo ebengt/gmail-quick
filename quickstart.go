@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 
@@ -18,13 +16,6 @@ import (
 	"google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
 )
-
-type config struct {
-	from     string
-	infile   string
-	receiver string
-	subject  string
-}
 
 const credentials_file = "credentials.json"
 const token_file = "token.json"
@@ -43,29 +34,6 @@ func main() {
 			log.Printf("Message sent to %v", c.receiver)
 		}
 	}
-}
-
-func configuration(args []string, from string) (result *config) {
-	result = new(config)
-	f := flag.NewFlagSet(args[0], flag.ExitOnError)
-	f.StringVar(&result.infile, "infile", "", "help message for infile")
-	f.StringVar(&result.subject, "subject", "", "help message for subject")
-	f.Parse(args[1:])
-	if result.infile == "" {
-		log.Fatalf("missing infile")
-	}
-	if result.subject == "" {
-		log.Fatalf("missing subject")
-	}
-	result.receiver = f.Arg(0)
-	if result.receiver == "" {
-		log.Fatalf("missing receiver")
-	}
-	result.from = os.Getenv(from)
-	if result.from == "" {
-		log.Fatalf("missing from")
-	}
-	return result
 }
 
 func list_labels(srv *gmail.Service) {
@@ -155,36 +123,6 @@ func getClient(config *oauth2.Config, tokFile string) *http.Client {
 		saveToken(tokFile, tok)
 	}
 	return config.Client(context.Background(), tok)
-}
-
-// Request a token from the web, then returns the retrieved token.
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser, then type the request here:\n%v\n", authURL)
-
-	var request string
-	if _, err := fmt.Scan(&request); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
-	}
-	authCode := getTokenFromWebParse(request)
-	tok, err := config.Exchange(context.TODO(), authCode)
-	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
-	}
-	return tok
-}
-
-// Parse request for the retrieved token.
-func getTokenFromWebParse(request string) string {
-	u, err := url.Parse(request)
-	if err != nil {
-		log.Fatalf("Unable to parse request: %v", err)
-	}
-	q, err := url.ParseQuery(u.RawQuery)
-	if err != nil {
-		log.Fatalf("Unable to parse query: %v", err)
-	}
-	return q["code"][0]
 }
 
 // Retrieves a token from a local file.

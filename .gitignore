@@ -1,5 +1,6 @@
 *.json
 gmail-quick
+smtp_mail_alias
 # Binaries for programs and plugins
 *.exe
 *.exe~
